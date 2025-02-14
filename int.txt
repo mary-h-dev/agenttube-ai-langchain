@@ -1,0 +1,36 @@
+pnpm dlx create-next-app@latest ./
+pnpm dev
+
+
+go to the https://wxflows.ibm.stepzen.com/ and login
+go to the building
+login download cli globaly
+doing authentication
+
+
+
+install clerk
+pnpm add @clerk/nextjs
+add env and middleware
+
+
+
+
+install convex
+pnpm dlx create convex@latest
+pnpm install convex
+
+
+
+after that u should foucose on clerk and convex that is in the doc convex
+go to the clerk=>configration=>jwt=>add convex- and see settings data
+copy the issuer url
+paste it in the auth.config.ts
+and as well paset it in the convex=>envirements-variables
+after that the convex is ready to function
+
+
+
+
+
+
