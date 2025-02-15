@@ -19,6 +19,8 @@ add env and middleware
 install convex
 pnpm dlx create convex@latest
 pnpm install convex
+npx convex dev
+
 
 
 
@@ -40,6 +42,11 @@ pnpm install @radix-ui/react-icons
 
 
 set navigationProvider to store date among diffrent components
+
+
+craete skima
+create chat regarding create delete and....
+
 
 
 

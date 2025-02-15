@@ -16,7 +16,7 @@ export default function DashboardLayout({
         <Authenticated>
           <Sidebar />
         </Authenticated>
-        <div className="bg-red-500 flex-1">
+        <div className="flex-1">
           <Header />
           <main>{children}</main>
         </div>
