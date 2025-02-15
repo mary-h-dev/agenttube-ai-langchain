@@ -1,3 +1,4 @@
+import { api } from "@/convex/_generated/api";
 import { getConvexClient } from "@/lib/convex";
 import {
   ChatRequestBody,
@@ -55,12 +56,12 @@ export async function POST(req: Request) {
           await sendSSEMessage(writer, { type: StreamMessageType.Connected });
   
           // ارسال پیام جدید کاربر به Convex
-        //   await convex.mutation(api.messages.send, {
-        //     chatId,
-        //     content: newMessage,
-        //   });
+          await convex.mutation(api.messages.send, {
+            chatId,
+            content: newMessage,
+          });
   
-        //   writer.close();
+          writer.close();
         } catch (error) {
           console.error("Error in chat API:", error);
           return NextResponse.json(
