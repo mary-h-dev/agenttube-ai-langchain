@@ -31,6 +31,20 @@ after that the convex is ready to function
 
 
 
+some other packages:
+pnpm install @radix-ui
+pnpm i radix-ui  
+pnpm install @radix-ui/react-icons
+
+
+
+
+set navigationProvider to store date among diffrent components
+
+
+
+
+
 
 
 
