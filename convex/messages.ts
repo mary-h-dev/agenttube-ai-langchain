@@ -2,7 +2,9 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { mutation } from "./_generated/server";
 
+
 const SHOW_COMMENTS = false;
+
 
 export const list = query({
   args: { chatId: v.id("chats") },
@@ -58,7 +60,8 @@ export const store = mutation({
   handler: async (ctx, args) => {
     const messageId = await ctx.db.insert("messages", {
       chatId: args.chatId,
-      content: args.content.replace(/\n/g, "\\n"),
+      content: args.content.replace(/\n/g, "\\n")
+      .replace(/\\/g,"\\\\"),
       role: args.role,
       createdAt: Date.now(),
     });
