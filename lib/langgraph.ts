@@ -127,7 +127,8 @@ const createWorkflow = () => {
       const trimmedMessages = await trimmer.invoke(state.messages);
 
       //format the prompt with the correct messages
-      const prompt = await promptTemplate.invoke({ messages: trimMessages });
+      const prompt = await promptTemplate.invoke({ messages: trimmedMessages });
+
       //get response from the model
       const response = await model.invoke(prompt);
 
