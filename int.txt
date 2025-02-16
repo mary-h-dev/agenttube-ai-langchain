@@ -49,9 +49,39 @@ create chat regarding create delete and....
 
 
 
+install langchain
+pnpm add langchain @langchain/core @langchain/anthropic @langchain/langgraph
+
+for getting api je go https://console.anthropic.com/
+
+ 
+
+ '''
+ wxflows
+ '''
+
+
+pnpm i @wxflows/sdk@beta
+creat a wxflows folder
+cd wxflows
+and go init
+and follow the instructures that is in the https://wxflows.ibm.stepzen.com/docs/getting-started
+and we follow some other tips of here https://developer.ibm.com/tutorials/awb-build-tool-calling-agents-with-langgraph-and-flows-engine/#step-1-install-the-wxflows-cli4
+for test=> 
+//costomers at : https://introspection.apis.stepzen.com/customers
+//Comments at : https://dummyjson.com/comments
+
+wxflows import curl https://dummyjson.com/comments 
+
+
+go to the https://github.com/IBM/wxflows/tree/main/tools and select just one
+for example: wxflows import tool https://raw.githubusercontent.com/IBM/wxflows/refs/heads/main/tools/youtube_transcript.zip
 
 
 
+after all u shold code wxflows deploy
+and save this=> WXFLOWS_ENDPOINT=https://fengboyucun.us-east-a.ibm.stepzen.net/api/estranged-otter/__graphql
 
-
+and after that u should code wxflows whoami --apikey
+and save this=> WXFLOWS_APIKEY=fengboyucun::local.net+1000::49c8bb0f97f3f96b69ed20ba12be52ce2bc9ed9852308bd40fd3b008959722b2
 
