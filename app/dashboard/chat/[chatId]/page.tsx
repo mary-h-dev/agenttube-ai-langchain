@@ -15,20 +15,17 @@ interface ChatPageProps {
 async function ChatPage({ params }: ChatPageProps) {
   const { chatId } = await params;
 
-  // Get user authentication
   const { userId } = await auth();
   console.log("userid", userId);
 
-  //   if (!userId) {
-  //     redirect("/");
-  //   }
-
+    // if (!userId) {
+    //   redirect("/");
+    // }
 
   try {
-    // دریافت کلاینت Convex
+
     const convex = getConvexClient();
 
-    // دریافت پیام‌های چت
     const initialMessages = await convex.query(api.messages.list, { chatId });
 
     return (
@@ -43,4 +40,6 @@ async function ChatPage({ params }: ChatPageProps) {
 
 }
 
-export default ChatPage;
+
+export default ChatPage
+
