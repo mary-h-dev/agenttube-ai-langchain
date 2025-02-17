@@ -4,14 +4,15 @@ import { Id, Doc } from "@/convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
-import { ChatRequestBody } from "@/lib/types";
+import { ChatRequestBody, StreamMessageType } from "@/lib/types";
+import { createSSEParser } from "@/lib/createSSEParser";
+import { getConvexClient } from "@/lib/convex";
+import { api } from "@/convex/_generated/api";
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
   initialMessages: Doc<"messages">[];
 }
-
-
 
 function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Doc<"messages">[]>(initialMessages);
@@ -25,10 +26,30 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const processStream = async (
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    onChunk: (chunk: string) => Promise<void>
+  ) => {
+    try {
+      while (true) {
+        // Read the next chunk from the stream
+        const { done, value } = await reader.read();
+
+        // If the stream is finished, exit the loop
+        if (done) break;
+
+        // Decode the chunk and pass it to the onChunk callback
+        await onChunk(new TextDecoder().decode(value));
+      }
+    } finally {
+      // Release the reader lock to free up resources
+      reader.releaseLock();
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamedResponse]);
-
 
 
 
@@ -55,12 +76,10 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
     setMessages((prev) => [...prev, optimisticUserMessage]);
 
-    let fullResponse=""
+    let fullResponse = "";
 
-
-
-    // Prepare request body
     try {
+      // Prepare request body
       const requestBody: ChatRequestBody = {
         messages: messages.map((msg) => ({
           role: msg.role,
@@ -70,8 +89,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         chatId,
       };
 
-
-
       // Initialize SSE connection
       const response = await fetch("/api/chat/stream", {
         method: "POST",
@@ -79,28 +96,96 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         body: JSON.stringify(requestBody),
       });
 
-
-
       if (!response.ok) throw new Error(await response.text());
       if (!response.body) throw new Error("No response body available");
 
       // Handle response stream
-    //   const reader = response.body.getReader();
-    //   const decoder = new TextDecoder();
-    //   let fullResponse = "";
+      const parser = createSSEParser();
+      const reader = response.body.getReader();
 
-    //   try {
-    //     while (true) {
-    //       const { done, value } = await reader.read();
-    //       if (done) break;
+      // Process the stream chunks
+      await processStream(reader, async (chunk) => {
+        // Parse SSE messages from the chunk
+        const messages = parser.parse(chunk);
 
-    //       const text = decoder.decode(value, { stream: true });
-    //       fullResponse += text;
-    //       setStreamedResponse((prev) => prev + text);
-    //     }
-    //   } catch (error) {
-    //     console.error("Error reading stream:", error);
-    //   }
+        for (const message of messages) {
+          switch (message.type) {
+            case StreamMessageType.Token:
+              // Handle streaming tokens (normal text response)
+              if ("token" in message) {
+                fullResponse += message.token;
+                setStreamedResponse(fullResponse);
+              }
+              break;
+
+            case StreamMessageType.ToolStart:
+              // Handle start of tool execution (e.g. API calls, file operations)
+              if ("tool" in message) {
+                setCurrentTool({
+                  name: message.tool,
+                  input: message.input,
+                });
+              }
+              fullResponse += formatTerminalOutput(
+                message.tool,
+                message.input,
+                "Processing..."
+              );
+              setStreamedResponse(fullResponse);
+              break;
+
+            case StreamMessageType.ToolEnd:
+              // Handle completion of tool execution
+              if ("tool" in message && currentTool) {
+                // Replace the "Processing..." message with actual output
+                const lastTerminalIndex = fullResponse.lastIndexOf(
+                  `<div class="bg-[#1e1e1e]"`
+                );
+                if (lastTerminalIndex !== -1) {
+                  fullResponse =
+                    fullResponse.substring(0, lastTerminalIndex) +
+                    formatTerminalOutput(
+                      message.tool,
+                      currentTool.input,
+                      message.output
+                    );
+                }
+                setStreamedResponse(fullResponse);
+                setCurrentTool(null);
+              }
+              break;
+
+            case StreamMessageType.Error:
+              // Handle error messages from the stream
+              if ("error" in message) {
+                throw new Error(message.error);
+              }
+              break;
+
+            case StreamMessageType.Done:
+              // Handle completion of the entire response
+              const assistantMessage: Doc<"messages"> = {
+                _id: `temp_assistant_${Date.now()}`,
+                chatId,
+                content: fullResponse,
+                role: "assistant",
+                createdAt: Date.now(),
+              } as Doc<"messages">;
+
+              // Save the complete message to the database
+              const convex = getConvexClient();
+              await convex.mutation(api.messages.store, {
+                chatId,
+                content: fullResponse,
+                role: "assistant",
+              });
+
+              setMessages((prev) => [...prev, assistantMessage]);
+              setStreamedResponse("");
+              return;
+          }
+        }
+      });
     } catch (error) {
       console.error("Error sending message:", error);
       // Remove the optimistic message if there was an error
@@ -112,8 +197,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       setIsLoading(false);
     }
   };
-
-
 
 
 
