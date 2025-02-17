@@ -1,5 +1,4 @@
 "use client";
-
 import { Id, Doc } from "@/convex/_generated/dataModel";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
@@ -8,6 +7,7 @@ import { ChatRequestBody, StreamMessageType } from "@/lib/types";
 import { createSSEParser } from "@/lib/createSSEParser";
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
+import MessageBubble from "./MessageBubble";
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
@@ -24,8 +24,55 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     input: unknown;
   } | null>(null);
 
+  // به انتهای ‍‍‍‍‍یام میره
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  //این میره به انتهای صفحه در صورت یکه ‍یام جدیدی برامون بیاد
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streamedResponse]);
+
+  //  تبدیل داده به رشته
+  const formatToolOutput = (output: unknown): string => {
+    if (typeof output === "string") return output;
+    return JSON.stringify(output, null, 2);
+  };
+
+  //خروجی ابزار را بخ یک قالبت HTML  زیبا و خوانا تبدیل می کنه
+  const formatTerminalOutput = ({
+    tool,
+    input,
+    output,
+  }: {
+    tool: string;
+    input: unknown;
+    output: unknown;
+  }) => {
+    const terminalHtml = `
+      <div class="bg-[#1e1e1e] text-white font-mono p-2 rounded-md my-2 overflow-x-auto whitespace-normal max-w-[600px]">
+        <div class="flex items-center gap-1.5 border-b border-gray-700 pb-1">
+          <span class="text-red-500">~</span>
+          <span class="text-yellow-500">$</span>
+          <span class="text-green-500">></span>
+          <span class="text-gray-400 ml-1 text-sm">(${tool})</span>
+        </div>
+  
+        <div class="text-gray-400 mt-1.5">Input:</div>
+        <pre class="text-yellow-400 mt-0.5 whitespace-pre-wrap overflow-x-auto">
+          ${formatToolOutput(input)}
+        </pre>
+   
+        <div class="text-gray-400 mt-1.5">Output:</div>
+        <pre class="text-green-400 mt-0.5 whitespace-pre-wrap overflow-x-auto">
+          ${formatToolOutput(output)}
+        </pre>
+      </div>
+    `;
+
+    return `---START---\n${terminalHtml}\n---END---`;
+  };
+
+  // این تابع با استفاده از یک reader داده ها را به صورت چانگ میخونه و به تابع دیگه می فرسته تا نمایش داده بشه
   const processStream = async (
     reader: ReadableStreamDefaultReader<Uint8Array>,
     onChunk: (chunk: string) => Promise<void>
@@ -47,12 +94,9 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     }
   };
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamedResponse]);
-
-
-
+  // ارسال فرم
+  // ابدا داده های کاربر  trim  میشه
+  // یعنی اگه جایی اضافی بود رو حذف می کنه
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +109,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     setStreamedResponse("");
     setIsLoading(true);
 
+    // تا اینجا ‍یام کاربر رفته حالا می خوایم خیلی خوب نمایش داده بشه
     // Add user's message immediately for better UX
     const optimisticUserMessage: Doc<"messages"> = {
       _id: `temp_${Date.now()}`,
@@ -78,6 +123,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
     let fullResponse = "";
 
+    // اینجا ‍یام میره سمت سرور
     try {
       // Prepare request body
       const requestBody: ChatRequestBody = {
@@ -100,6 +146,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       if (!response.body) throw new Error("No response body available");
 
       // Handle response stream
+      // ‍س از دریافت ‍اسخ از سرور با استفاده از  createSSEParser داده های دریافتی به ‍یام های sse  تقسیم میشوند
       const parser = createSSEParser();
       const reader = response.body.getReader();
 
@@ -111,6 +158,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         for (const message of messages) {
           switch (message.type) {
             case StreamMessageType.Token:
+              //برای دریافت تکه های متنی ‍اسخ
               // Handle streaming tokens (normal text response)
               if ("token" in message) {
                 fullResponse += message.token;
@@ -119,22 +167,24 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
               break;
 
             case StreamMessageType.ToolStart:
+              // اینجا یک ابزار کارش رو انجام می ده و در ترمینا نمایش داده میشه
               // Handle start of tool execution (e.g. API calls, file operations)
               if ("tool" in message) {
                 setCurrentTool({
                   name: message.tool,
                   input: message.input,
                 });
+                fullResponse += formatTerminalOutput({
+                  tool: message.tool,
+                  input: message.input,
+                  output: "Processing...",
+                });
+                setStreamedResponse(fullResponse);
               }
-              fullResponse += formatTerminalOutput(
-                message.tool,
-                message.input,
-                "Processing..."
-              );
-              setStreamedResponse(fullResponse);
               break;
 
             case StreamMessageType.ToolEnd:
+              //‍ایان اجرای ابزار
               // Handle completion of tool execution
               if ("tool" in message && currentTool) {
                 // Replace the "Processing..." message with actual output
@@ -144,11 +194,11 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
                 if (lastTerminalIndex !== -1) {
                   fullResponse =
                     fullResponse.substring(0, lastTerminalIndex) +
-                    formatTerminalOutput(
-                      message.tool,
-                      currentTool.input,
-                      message.output
-                    );
+                    formatTerminalOutput({
+                      tool: message.tool,
+                      input: currentTool.input,
+                      output: message.output,
+                    });
                 }
                 setStreamedResponse(fullResponse);
                 setCurrentTool(null);
@@ -156,6 +206,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
               break;
 
             case StreamMessageType.Error:
+              // اگر خطا دریافت کردیم
               // Handle error messages from the stream
               if ("error" in message) {
                 throw new Error(message.error);
@@ -164,6 +215,8 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
             case StreamMessageType.Done:
               // Handle completion of the entire response
+              // در صورتی که انجام شد
+              // ‍یام ها در دیتابیس ذخیره میشود
               const assistantMessage: Doc<"messages"> = {
                 _id: `temp_assistant_${Date.now()}`,
                 chatId,
@@ -192,18 +245,54 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       setMessages((prev) =>
         prev.filter((msg) => msg._id !== optimisticUserMessage._id)
       );
-      setStreamedResponse("Error processing message");
+      setStreamedResponse(
+        formatTerminalOutput({
+          tool: "error",
+          input: "Failed to process message",
+          output: error instanceof Error ? error.message : "Unknown error",
+        })
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-
-
-
   return (
     <main className="flex flex-col h-[calc(100vh-theme(spacing.14))]">
-      <section className="flex-1 bg-red-800">dsgdfsgb</section>
+      {/* Messages */}
+      <section className="flex-1 overflow-y-auto bg-gray-50 p-2 md:p-0">
+        <div className="max-w-4xl mx-auto p-4 space-y-3">
+          {messages.map((message: Doc<"messages">) => (
+            <MessageBubble
+              key={message._id}
+              content={message.content}
+              isUser={message.role === "user"}
+            />
+          ))}
+          {/* Streamed Response */}
+          {streamedResponse && <MessageBubble content={streamedResponse} />}
+
+          {/* Loading Indicator */}
+          {isLoading && !streamedResponse && (
+            <div className="flex justify-start animate-in fade-in-0">
+              <div className="rounded-2xl px-4 py-3 bg-white text-gray-900 ring-1 ring-inset ring-gray-200 rounded-bl-none shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  {[0.3, 0.15, 0].map((delay, i) => (
+                    <div
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce"
+                      style={{ animationDelay: `${delay}s` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Last Message Scroll Ref */}
+          <div ref={messagesEndRef} />
+        </div>
+      </section>
       <footer className="border-t bg-white p-4">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto relative">
           <div className="relative flex items-center">

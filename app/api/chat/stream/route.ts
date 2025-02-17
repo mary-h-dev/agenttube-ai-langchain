@@ -26,10 +26,10 @@ function sendSSEMessage(
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+    // const { userId } = await auth();
+    // if (!userId) {
+    //   return new Response("Unauthorized", { status: 401 });
+    // }
 
     const body = (await req.json()) as ChatRequestBody;
     const { messages, newMessage, chatId } = body;
@@ -102,7 +102,6 @@ export async function POST(req: Request) {
 
           // ارسال پیام تکمیل پردازش
           await sendSSEMessage(writer, { type: StreamMessageType.Done });
-          
         } catch (streamError) {
           console.error("Error in event stream:", streamError);
 
