@@ -40,6 +40,8 @@ export async function POST(req: Request) {
     const stream = new TransformStream({}, { highWaterMark: 1024 });
     const writer = stream.writable.getWriter();
 
+
+    
     const response = new Response(stream.readable, {
       headers: {
         "Content-Type": "text/event-stream",

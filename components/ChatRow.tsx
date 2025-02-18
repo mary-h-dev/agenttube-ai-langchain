@@ -1,8 +1,10 @@
+import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { NavigationContext } from "@/lib/NavigationProvider";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
-// import TimeAgo from "react-timeago";
+import TimeAgo from "react-timeago";
 
 interface ChatRowProps {
   chat: Doc<"chats">;
@@ -12,6 +14,10 @@ interface ChatRowProps {
 function ChatRow({ chat, onDelete }: ChatRowProps) {
   const router = useRouter();
   const { closeMobileNav } = useContext(NavigationContext);
+
+  const LastMessage = useQuery(api.messages.getLastMessage, {
+    chatId: chat._id,
+  });
 
   const handleClick = () => {
     router.push(`/dashboard/chat/${chat._id}`);
@@ -25,23 +31,33 @@ function ChatRow({ chat, onDelete }: ChatRowProps) {
     >
       <div className="p-4">
         <div className="flex justify-between items-start">
-          <div className="font-medium">{chat.title}</div>
+          <p className="text-sm text-gray-600 truncate flex-1 font-medium">
+            {LastMessage ? (
+              <>
+                {LastMessage.role === "user" ? "you: " : "AI: "}
+                {LastMessage.content.replace(/\\n/g, "\n")}
+              </>
+            ) : (
+              <span className="text-gray-400">New conversation</span>
+            )}
+          </p>
+
           <button
             onClick={(e) => {
               e.stopPropagation();
               onDelete(chat._id);
             }}
-            className="text-red-500 hover:text-red-700"
+            className="text-gray-500 hover:text-gray-700"
           >
             🗑
           </button>
         </div>
 
-        {/* {chat.lastMessage && (
+        {LastMessage && (
           <div className="text-xs text-gray-400 mt-1.5 font-medium">
-            <TimeAgo date={chat.lastMessage.createdAt} />
+            <TimeAgo date={LastMessage.createdAt} />
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

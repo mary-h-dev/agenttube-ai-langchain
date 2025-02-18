@@ -1,4 +1,5 @@
-import { ChatAnthropic } from "@langchain/anthropic";
+// import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import wxflows from "@wxflows/sdk/langchain";
 
@@ -47,17 +48,14 @@ const tools = await toolClient.lcTools;
 const toolNode = new ToolNode(tools);
 
 export const initialiseModel = () => {
-  const model = new ChatAnthropic({
-    modelName: "Claude-3-5-sonnet-20241022",
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  const model = new ChatOpenAI({
+    modelName: "gpt-4o",
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    cache: true,
     temperature: 0.7,
     maxTokens: 4096,
     streaming: true,
-    clientOptions: {
-      defaultHeaders: {
-        "anthropic-beta": "prompt-caching-2024-07-31",
-      },
-    },
+    // clientOptions اگر پارامترهای خاصی برای OpenAI لازم دارید، می‌توانید در اینجا اضافه کنید
     callbacks: [
       {
         handleLLMStart: async () => {
@@ -66,17 +64,22 @@ export const initialiseModel = () => {
         handleLLMEnd: async (output) => {
           console.log("✅ End LLM Call", output);
           const usage = output.llmOutput?.usage;
+
+          output.generations.map((generation) => {
+            generation.map((g) => {
+              console.log("Generation", JSON.stringify(generation[0]));
+            });
+          });
           if (usage) {
+            // اگر می‌خواهید میزان مصرف توکن را لاگ کنید یا از آن استفاده کنید:
             // console.log("📊 Token Usage:", {
-            //   input_tokens: usage.input_tokens,
-            //   output_tokens: usage.output_tokens,
-            //   total_tokens: usage.input_tokens + usage.output_tokens,
-            //   cache_creation_input_tokens:
-            //     usage.cache_creation_input_tokens || 0,
-            //   cache_read_input_tokens: usage.cache_read_input_tokens || 0,
+            //   prompt_tokens: usage.prompt_tokens,
+            //   completion_tokens: usage.completion_tokens,
+            //   total_tokens: usage.total_tokens,
             // });
           }
         },
+        // برای مشاهده‌ی توکن‌های استریم شده می‌توانید از handleLLMNewToken استفاده کنید:
         // handleLLMNewToken: async (token: string) => {
         //   console.log("🆕 New token:", token);
         // },
@@ -86,6 +89,47 @@ export const initialiseModel = () => {
 
   return model;
 };
+
+// export const initialiseModel = () => {
+//   const model = new ChatAnthropic({
+//     modelName: "Claude-3-5-sonnet-20241022",
+//     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+//     temperature: 0.7,
+//     maxTokens: 4096,
+//     streaming: true,
+//     clientOptions: {
+//       defaultHeaders: {
+//         "anthropic-beta": "prompt-caching-2024-07-31",
+//       },
+//     },
+//     callbacks: [
+//       {
+//         handleLLMStart: async () => {
+//           console.log("🚀 Starting LLM call");
+//         },
+//         handleLLMEnd: async (output) => {
+//           console.log("✅ End LLM Call", output);
+//           const usage = output.llmOutput?.usage;
+//           if (usage) {
+//             // console.log("📊 Token Usage:", {
+//             //   input_tokens: usage.input_tokens,
+//             //   output_tokens: usage.output_tokens,
+//             //   total_tokens: usage.input_tokens + usage.output_tokens,
+//             //   cache_creation_input_tokens:
+//             //     usage.cache_creation_input_tokens || 0,
+//             //   cache_read_input_tokens: usage.cache_read_input_tokens || 0,
+//             // });
+//           }
+//         },
+//         // handleLLMNewToken: async (token: string) => {
+//         //   console.log("🆕 New token:", token);
+//         // },
+//       },
+//     ],
+//   }).bindTools(tools);
+
+//   return model;
+// };
 
 // تعریف تابعی که بررسی می‌کند ادامه داده شود یا نه
 function shouldContinue(state: typeof MessagesAnnotation.State) {
@@ -105,7 +149,6 @@ function shouldContinue(state: typeof MessagesAnnotation.State) {
   // در غیر این صورت، مکالمه را متوقف می‌کنیم و به کاربر پاسخ می‌دهیم
   return END;
 }
-
 
 const createWorkflow = () => {
   const model = initialiseModel();
@@ -141,8 +184,6 @@ const createWorkflow = () => {
 
   return stateGraph;
 };
-
-
 
 function addCachingHeaders(messages: BaseMessage[]): BaseMessage[] {
   // قوانین کش برای مدیریت پیام‌ها در مکالمات چرخشی
@@ -183,9 +224,6 @@ function addCachingHeaders(messages: BaseMessage[]): BaseMessage[] {
 
   return cachedMessages;
 }
-
-
-
 
 export async function submitQuestion(messages: BaseMessage[], chatId: string) {
   const cachedMessages = addCachingHeaders(messages);

@@ -8,6 +8,7 @@ import { createSSEParser } from "@/lib/createSSEParser";
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import MessageBubble from "./MessageBubble";
+import WelcomeMessage from "./WelcomeMessage";
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
@@ -227,6 +228,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
               // Save the complete message to the database
               const convex = getConvexClient();
+              console.log("debug", fullResponse)
               await convex.mutation(api.messages.store, {
                 chatId,
                 content: fullResponse,
@@ -262,6 +264,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       {/* Messages */}
       <section className="flex-1 overflow-y-auto bg-gray-50 p-2 md:p-0">
         <div className="max-w-4xl mx-auto p-4 space-y-3">
+          {messages?.length === 0 && <WelcomeMessage/>}
           {messages.map((message: Doc<"messages">) => (
             <MessageBubble
               key={message._id}
