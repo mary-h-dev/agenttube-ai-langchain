@@ -85,3 +85,10 @@ and save this=> WXFLOWS_ENDPOINT=https://fengboyucun.us-east-a.ibm.stepzen.net/a
 and after that u should code wxflows whoami --apikey
 and save this=> WXFLOWS_APIKEY=fengboyucun::local.net+1000::49c8bb0f97f3f96b69ed20ba12be52ce2bc9ed9852308bd40fd3b008959722b2
 
+
+
+
+//for hugging face model sue
+pnpm add @langchain/llms @langchain/chat_models @langchain/core
+pnpm add @huggingface/inference
+pnpm install langchain/llms/huggingface

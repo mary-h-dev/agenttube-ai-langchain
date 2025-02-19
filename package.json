@@ -11,6 +11,7 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.22.13",
     "@clerk/nextjs": "^6.11.3",
+    "@huggingface/inference": "^3.3.4",
     "@langchain/anthropic": "^0.3.13",
     "@langchain/core": "^0.3.40",
     "@langchain/langgraph": "^0.2.46",

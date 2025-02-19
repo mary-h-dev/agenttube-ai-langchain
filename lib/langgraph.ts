@@ -1,7 +1,9 @@
 // import { ChatAnthropic } from "@langchain/anthropic";
+// import { HfInference } from "@huggingface/inference";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import wxflows from "@wxflows/sdk/langchain";
+
 
 import {
   END,
@@ -47,6 +49,10 @@ const toolClient = new wxflows({
 const tools = await toolClient.lcTools;
 const toolNode = new ToolNode(tools);
 
+
+
+
+
 export const initialiseModel = () => {
   const model = new ChatOpenAI({
     modelName: "gpt-4o",
@@ -89,6 +95,9 @@ export const initialiseModel = () => {
 
   return model;
 };
+
+
+
 
 // export const initialiseModel = () => {
 //   const model = new ChatAnthropic({
