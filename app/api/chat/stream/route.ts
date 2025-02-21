@@ -8,7 +8,7 @@ import {
   StreamMessage,
   StreamMessageType,
 } from "@/lib/types";
-import { auth } from "@clerk/nextjs/server";
+// import { auth } from "@clerk/nextjs/server";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { NextResponse } from "next/server";
 

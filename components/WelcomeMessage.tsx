@@ -19,7 +19,7 @@ export default function WelcomeMessage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-500 mt-1">•</span>
-            <span>Processing data with JSONata</span>
+            <span>Processing data with JSONdata</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-500 mt-1">•</span>
@@ -31,7 +31,7 @@ export default function WelcomeMessage() {
           </li>
         </ul>
         <p className="text-gray-600 mt-4 leading-relaxed">
-          Feel free to ask me anything! <a href="#" className="text-blue-500 underline">Zappos</a> here to help.
+          Feel free to ask me anything! <a href="https://maryyam.dev" className="text-blue-500 underline">Maryam</a> here to help.
         </p>
       </div>
     </div>

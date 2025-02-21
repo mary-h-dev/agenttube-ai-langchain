@@ -19,14 +19,9 @@ function Sidebar() {
   const deleteChat = useMutation(api.chats.deleteChat);
 
 
-  const handleClick = async () => {
-    // const newChat = await createChat({ title: "New Chat" });
-    closeMobileNav();
-
-    // if (newChat) {
-    //   router.push(`/dashboard/chat/${newChat._id}`);
-    // }
-  };
+  // const handleClick = async () => {
+  //   closeMobileNav();
+  // };
 
 
 

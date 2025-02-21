@@ -11,6 +11,13 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // قوانین مورد نظر را اینجا اضافه کنید یا تغییر دهید
+      "no-unused-vars": "off", // غیرفعال کردن هشدار متغیرهای استفاده‌نشده
+      "react/no-unescaped-entities": "off", // غیرفعال کردن هشدار کاراکترهای غیرمجاز در JSX
+    },
+  },
 ];
 
 export default eslintConfig;

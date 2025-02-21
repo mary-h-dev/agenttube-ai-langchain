@@ -71,7 +71,7 @@ export const initialiseModel = () => {
           const usage = output.llmOutput?.usage;
 
           output.generations.map((generation) => {
-            generation.map((g) => {
+            generation.map(() => {
               console.log("Generation", JSON.stringify(generation[0]));
             });
           });
