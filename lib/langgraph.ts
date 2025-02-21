@@ -45,11 +45,10 @@ const toolClient = new wxflows({
   apikey: process.env.WXFLOWS_APIKEY || "",
 });
 
+
 // ✅ دریافت ابزارها (Retrieve the tools)
 const tools = await toolClient.lcTools;
 const toolNode = new ToolNode(tools);
-
-
 
 
 

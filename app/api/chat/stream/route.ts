@@ -32,7 +32,16 @@ export async function POST(req: Request) {
     // }
 
     const body = (await req.json()) as ChatRequestBody;
-    const { messages, newMessage, chatId } = body;
+    const { messages, newMessage, chatId, userId } = body;
+
+    // اگر به صورت جدی نیاز دارید احراز هویت کنید، باید userId معتبر باشد
+    if (!userId) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    // اینجا می‌توانید از userId برای کاری که نیاز دارید استفاده کنید
+    // مثلا نوشتن لاگ:
+    console.log("userId received from client:", userId);
 
     const convex = getConvexClient();
 
@@ -40,8 +49,6 @@ export async function POST(req: Request) {
     const stream = new TransformStream({}, { highWaterMark: 1024 });
     const writer = stream.writable.getWriter();
 
-
-    
     const response = new Response(stream.readable, {
       headers: {
         "Content-Type": "text/event-stream",

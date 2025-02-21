@@ -1,5 +1,9 @@
 pnpm dlx create-next-app@latest ./
-pnpm dev
+
+
+for start:
+front:pnpm dev
+back: npx convex dev
 
 
 go to the https://wxflows.ibm.stepzen.com/ and login
@@ -87,8 +91,16 @@ and save this=> WXFLOWS_APIKEY=fengboyucun::local.net+1000::49c8bb0f97f3f96b69ed
 
 
 
-
 //for hugging face model sue
 pnpm add @langchain/llms @langchain/chat_models @langchain/core
 pnpm add @huggingface/inference
 pnpm install langchain/llms/huggingface
+
+
+
+for test
+npm install @testing-library/react @testing-library/jest-dom jest
+
+
+foe dark mode
+npm install next-themes

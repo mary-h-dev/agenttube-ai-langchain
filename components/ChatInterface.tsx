@@ -9,6 +9,8 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import MessageBubble from "./MessageBubble";
 import WelcomeMessage from "./WelcomeMessage";
+import { useAuth } from "@clerk/nextjs";
+
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
@@ -16,6 +18,7 @@ interface ChatInterfaceProps {
 }
 
 function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
+  const { userId } = useAuth();
   const [messages, setMessages] = useState<Doc<"messages">[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -134,6 +137,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         })),
         newMessage: trimmedInput,
         chatId,
+        userId, // اینجا مقدار userId را می‌فرستیم
       };
 
       // Initialize SSE connection
