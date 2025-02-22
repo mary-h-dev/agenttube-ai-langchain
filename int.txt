@@ -104,3 +104,8 @@ npm install @testing-library/react @testing-library/jest-dom jest
 
 foe dark mode
 npm install next-themes
+
+
+
+for deploynpm 
+install -g vercel

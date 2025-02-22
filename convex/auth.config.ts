@@ -10,3 +10,5 @@ export default {
     },
   ],
 };
+
+console.log("CLERK_ISSUER_URL:", process.env.CLERK_ISSUER_URL);
