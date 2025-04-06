@@ -5,7 +5,7 @@ import {ChatGoogleGenerativeAI} from "@langchain/google-genai"
 
 const llm = new ChatGoogleGenerativeAI({
     modelName: "gemini-pro",
-    apiKey: "AIzaSyA4FF4tb3Xljw4FnuZnpe3A-j2r0zR_56k",
+    apiKey: process.env.TEST_GEMENI_API_KEY,
     temperature: 0.7,
 });
 

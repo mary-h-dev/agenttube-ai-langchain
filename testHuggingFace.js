@@ -6,7 +6,7 @@ import { HuggingFaceHub } from "@langchain/community";
 const llm = new HuggingFaceHub({
   repoId: "gpt2",
   modelKwargs: { temperature: 0.9, maxLength: 50 },
-  huggingFaceHubApiKey: "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",
+  huggingFaceHubApiKey: process.env.HUGGINGFACEHUB_API_KEY,
 });
 
 const response = await llm.invoke("سلام، چطوری؟");
