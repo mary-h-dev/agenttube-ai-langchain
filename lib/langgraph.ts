@@ -1,6 +1,7 @@
 // import { ChatAnthropic } from "@langchain/anthropic";
 // import { HfInference } from "@huggingface/inference";
 import { ChatOpenAI } from "@langchain/openai";
+// import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import wxflows from "@wxflows/sdk/langchain";
 
@@ -31,7 +32,7 @@ import {
 
 // مدیریت پیام‌ها برای حفظ تاریخچه مکالمه
 const trimmer = trimMessages({
-  maxTokens: 10, // حداکثر تعداد توکن‌های پیام
+  maxTokens: 1000, // حداکثر تعداد توکن‌های پیام
   strategy: "last", // استراتژی انتخاب پیام‌های اخیر
   tokenCounter: (msgs) => msgs.length, // شمارش توکن‌ها از تعداد پیام‌ها
   includeSystem: true, // پیام‌های سیستمی را نیز در نظر بگیر
@@ -49,6 +50,39 @@ const toolClient = new wxflows({
 // ✅ دریافت ابزارها (Retrieve the tools)
 const tools = await toolClient.lcTools;
 const toolNode = new ToolNode(tools);
+
+
+
+
+// export const initialiseModel = () => {
+//   const model = new ChatGoogleGenerativeAI({
+//     modelName: "gemini-pro",
+//     apiKey: process.env.GOOGLE_API_KEY,
+//     temperature: 0.7,
+//     streaming: false,
+//     callbacks: [
+//       {
+//         handleLLMStart: async () => {
+//           console.log("🚀 Starting LLM call");
+//         },
+//         handleLLMEnd: async (output) => {
+//           console.log("✅ End LLM Call", output);
+//           const usage = output.llmOutput?.usage;
+//           if (usage) {
+//             // اگه می‌خوای مصرف توکن رو لاگ کنی، می‌تونی این بخش رو نگه داری
+//             // console.log("📊 Token Usage:", {
+//             //   prompt_tokens: usage.prompt_tokens,
+//             //   completion_tokens: usage.completion_tokens,
+//             //   total_tokens: usage.total_tokens,
+//             // });
+//           }
+//         },
+//       },
+//     ],
+//   }).bindTools(tools);
+
+//   return model;
+// };
 
 
 
@@ -77,24 +111,23 @@ export const initialiseModel = () => {
           });
           if (usage) {
             // اگر می‌خواهید میزان مصرف توکن را لاگ کنید یا از آن استفاده کنید:
-            // console.log("📊 Token Usage:", {
-            //   prompt_tokens: usage.prompt_tokens,
-            //   completion_tokens: usage.completion_tokens,
-            //   total_tokens: usage.total_tokens,
-            // });
+            console.log("📊 Token Usage:", {
+              prompt_tokens: usage.prompt_tokens,
+              completion_tokens: usage.completion_tokens,
+              total_tokens: usage.total_tokens,
+            });
           }
         },
         // برای مشاهده‌ی توکن‌های استریم شده می‌توانید از handleLLMNewToken استفاده کنید:
-        // handleLLMNewToken: async (token: string) => {
-        //   console.log("🆕 New token:", token);
-        // },
+        handleLLMNewToken: async (token: string) => {
+          console.log("🆕 New token:", token);
+        },
       },
     ],
   }).bindTools(tools);
 
   return model;
 };
-
 
 
 

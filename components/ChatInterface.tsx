@@ -9,7 +9,7 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import MessageBubble from "./MessageBubble";
 import WelcomeMessage from "./WelcomeMessage";
-import { useAuth } from "@clerk/nextjs";
+// import { useAuth } from "@clerk/nextjs";
 
 
 interface ChatInterfaceProps {
@@ -18,7 +18,8 @@ interface ChatInterfaceProps {
 }
 
 function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
-  const { userId } = useAuth();
+  // const { userId } = useAuth();
+  // console.log("userId Interface",userId)
   const [messages, setMessages] = useState<Doc<"messages">[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +138,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         })),
         newMessage: trimmedInput,
         chatId,
-        userId, // اینجا مقدار userId را می‌فرستیم
+        // userId,  
       };
 
       // Initialize SSE connection
@@ -219,9 +220,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
               break;
 
             case StreamMessageType.Done:
-              // Handle completion of the entire response
-              // در صورتی که انجام شد
-              // ‍یام ها در دیتابیس ذخیره میشود
               const assistantMessage: Doc<"messages"> = {
                 _id: `temp_assistant_${Date.now()}`,
                 chatId,
@@ -230,7 +228,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
                 createdAt: Date.now(),
               } as Doc<"messages">;
 
-              // Save the complete message to the database
               const convex = getConvexClient();
               console.log("debug", fullResponse)
               await convex.mutation(api.messages.store, {

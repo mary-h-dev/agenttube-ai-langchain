@@ -10,6 +10,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import ChatRow from "./ChatRow";
 
 
+
 function Sidebar() {
   const router = useRouter();
   const { closeMobileNav, isMobileNavOpen } = useContext(NavigationContext);
@@ -22,7 +23,6 @@ function Sidebar() {
   // const handleClick = async () => {
   //   closeMobileNav();
   // };
-
 
 
   const handleNewChat = async () => {

@@ -24,6 +24,12 @@ function ChatRow({ chat, onDelete }: ChatRowProps) {
     closeMobileNav();
   };
 
+ // تابعی برای تبدیل timestamp به رشته تاریخ محلی
+ const getLocalDateString = (timestamp: number): string => {
+  return new Date(timestamp).toLocaleString();
+};
+;
+
   return (
     <div
       className="group rounded-xl border border-gray-200/30 bg-white/50 backdrop-blur-sm hover:bg-white/80 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
@@ -55,7 +61,7 @@ function ChatRow({ chat, onDelete }: ChatRowProps) {
 
         {LastMessage && (
           <div className="text-xs text-gray-400 mt-1.5 font-medium">
-            <TimeAgo date={LastMessage.createdAt} />
+            <TimeAgo date={getLocalDateString(LastMessage.createdAt)} />
           </div>
         )}
       </div>

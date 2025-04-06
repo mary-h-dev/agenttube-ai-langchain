@@ -77,7 +77,6 @@ export const getLastMessage = query({
     if (!identity) {
       throw new Error("Not authenticated");
     }
-
     const chat = await ctx.db.get(args.chatId);
     if (!chat || chat.userId !== identity.subject) {
       throw new Error("Unauthorized");
