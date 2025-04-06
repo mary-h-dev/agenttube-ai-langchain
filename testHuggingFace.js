@@ -1,8 +1,5 @@
 import { HuggingFaceHub } from "@langchain/community";
 
-
-
-
 const llm = new HuggingFaceHub({
   repoId: "gpt2",
   modelKwargs: { temperature: 0.9, maxLength: 50 },
@@ -11,12 +8,6 @@ const llm = new HuggingFaceHub({
 
 const response = await llm.invoke("سلام، چطوری؟");
 console.log(response);
-
-
-
-
-
-
 
 // import { HuggingFaceInference } from "langchain/llms/hf";
 
