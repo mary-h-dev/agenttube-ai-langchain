@@ -3,6 +3,9 @@ import { useUser } from "@clerk/nextjs";
 import { BotIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
+
+
+
 interface MessageBubbleProps {
   content: string;
   isUser?: boolean;
@@ -25,7 +28,7 @@ const formatMessage = ({ content }: { content: string }) => {
 
 function MessageBubble({ content, isUser }: MessageBubbleProps) {
   const { user } = useUser();
-  console.log("user",user )
+  // console.log("user",user )
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -38,7 +41,6 @@ function MessageBubble({ content, isUser }: MessageBubbleProps) {
             : "bg-white text-gray-900 rounded-bl-none ring-gray-200")
         }
       >
-        {/* اگر می‌خواهید آواتار یا آیکون ربات را کنار باکس نمایش دهید */}
         <div className="absolute bottom-0 -left-10">
           <div
             className={

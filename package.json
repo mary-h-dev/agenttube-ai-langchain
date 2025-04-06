@@ -1,6 +1,7 @@
 {
   "name": "agent",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,7 +14,9 @@
     "@clerk/nextjs": "^6.11.3",
     "@huggingface/inference": "^3.3.4",
     "@langchain/anthropic": "^0.3.13",
+    "@langchain/community": "^0.3.32",
     "@langchain/core": "^0.3.40",
+    "@langchain/google-genai": "^0.1.8",
     "@langchain/langgraph": "^0.2.46",
     "@langchain/openai": "^0.4.4",
     "@radix-ui/react-avatar": "^1.1.3",

@@ -32,16 +32,16 @@ export async function POST(req: Request) {
     // }
 
     const body = (await req.json()) as ChatRequestBody;
-    const { messages, newMessage, chatId, userId } = body;
+    const { messages, newMessage, chatId } = body;
 
     // اگر به صورت جدی نیاز دارید احراز هویت کنید، باید userId معتبر باشد
-    if (!userId) {
-      return new Response("Unauthorized", { status: 401 });
-    }
+    // if (!userId) {
+    //   return new Response("Unauthorized", { status: 401 });
+    // }
 
     // اینجا می‌توانید از userId برای کاری که نیاز دارید استفاده کنید
     // مثلا نوشتن لاگ:
-    console.log("userId received from client:", userId);
+    // console.log("userId received from client:", userId);
 
     const convex = getConvexClient();
 
