@@ -8,9 +8,11 @@ import {
   StreamMessage,
   StreamMessageType,
 } from "@/lib/types";
-// import { auth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { NextResponse } from "next/server";
+
+
 
 function sendSSEMessage(
   writer: WritableStreamDefaultWriter<Uint8Array>,
@@ -24,50 +26,43 @@ function sendSSEMessage(
   );
 }
 
+
+
 export async function POST(req: Request) {
   try {
-    // const { userId } = await auth();
-    // if (!userId) {
-    //   return new Response("Unauthorized", { status: 401 });
-    // }
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     const body = (await req.json()) as ChatRequestBody;
     const { messages, newMessage, chatId } = body;
 
-    // اگر به صورت جدی نیاز دارید احراز هویت کنید، باید userId معتبر باشد
-    // if (!userId) {
-    //   return new Response("Unauthorized", { status: 401 });
-    // }
-
-    // اینجا می‌توانید از userId برای کاری که نیاز دارید استفاده کنید
-    // مثلا نوشتن لاگ:
-    // console.log("userId received from client:", userId);
+  
 
     const convex = getConvexClient();
 
-    // ایجاد استریم با استراتژی صف بزرگ‌تر برای عملکرد بهتر
     const stream = new TransformStream({}, { highWaterMark: 1024 });
     const writer = stream.writable.getWriter();
+
 
     const response = new Response(stream.readable, {
       headers: {
         "Content-Type": "text/event-stream",
         Connection: "keep-alive",
-        "X-Accel-Buffering": "no", // غیرفعال کردن بافر برای Nginx که برای SSE ضروری است
+        "X-Accel-Buffering": "no", 
       },
     });
 
     const startStream = async () => {
       try {
-        // پیام اولیه برای اتصال استریم
         await sendSSEMessage(writer, { type: StreamMessageType.Connected });
-
-        // ارسال پیام جدید کاربر به Convex
         await convex.mutation(api.messages.send, {
           chatId,
           content: newMessage,
         });
-        // تبدیل پیام‌ها به فرمت LangChain
+
+        
         const langChainMessages = [
           ...messages.map((msg) =>
             msg.role === "user"
@@ -77,10 +72,8 @@ export async function POST(req: Request) {
           new HumanMessage(newMessage),
         ];
         try {
-          // ایجاد جریان رویداد
           const eventStream = await submitQuestion(langChainMessages, chatId);
 
-          // پردازش داده‌های دریافتی از جریان رویداد
           for await (const event of eventStream) {
             if (event.event === "on_chat_model_stream") {
               const token = event.data.chunk;
@@ -109,7 +102,6 @@ export async function POST(req: Request) {
             }
           }
 
-          // ارسال پیام تکمیل پردازش
           await sendSSEMessage(writer, { type: StreamMessageType.Done });
         } catch (streamError) {
           console.error("Error in event stream:", streamError);

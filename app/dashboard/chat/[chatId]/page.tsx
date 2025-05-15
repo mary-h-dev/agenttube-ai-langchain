@@ -1,7 +1,7 @@
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-// import { auth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import ChatInterface from "@/components/ChatInterface";
 
@@ -15,12 +15,12 @@ interface ChatPageProps {
 async function ChatPage({ params }: ChatPageProps) {
   const { chatId } = await params;
 
-  // const { userId } = await auth();
-  // console.log("userid", userId);
+  const { userId } = await auth();
+  console.log("userid", userId);
 
-    // if (!userId) {
-    //   redirect("/");
-    // }
+    if (!userId) {
+      redirect("/");
+    }
 
   try {
 

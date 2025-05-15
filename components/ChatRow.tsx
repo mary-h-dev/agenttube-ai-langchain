@@ -11,24 +11,29 @@ interface ChatRowProps {
   onDelete: (id: Id<"chats">) => void;
 }
 
+
 function ChatRow({ chat, onDelete }: ChatRowProps) {
   const router = useRouter();
   const { closeMobileNav } = useContext(NavigationContext);
+
 
   const LastMessage = useQuery(api.messages.getLastMessage, {
     chatId: chat._id,
   });
 
+  
   const handleClick = () => {
-    router.push(`/dashboard/chat/${chat._id}`);
+    router.push(`/deep-research/chat/${chat._id}`);
     closeMobileNav();
   };
 
- // تابعی برای تبدیل timestamp به رشته تاریخ محلی
+
+
  const getLocalDateString = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString();
 };
-;
+
+
 
   return (
     <div

@@ -16,8 +16,7 @@ export interface Message {
 export interface ChatRequestBody {
   messages: Message[];
   newMessage: string;
-  chatId: Id<"chats">;
-  // userId?: string | null;   
+  chatId: Id<"chats">; 
 }
 
 export enum StreamMessageType {

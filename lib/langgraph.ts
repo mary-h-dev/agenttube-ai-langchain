@@ -1,7 +1,4 @@
-// import { ChatAnthropic } from "@langchain/anthropic";
-// import { HfInference } from "@huggingface/inference";
-import { ChatOpenAI } from "@langchain/openai";
-// import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatAnthropic } from "@langchain/anthropic";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import wxflows from "@wxflows/sdk/langchain";
 
@@ -54,47 +51,18 @@ const toolNode = new ToolNode(tools);
 
 
 
-// export const initialiseModel = () => {
-//   const model = new ChatGoogleGenerativeAI({
-//     modelName: "gemini-pro",
-//     apiKey: process.env.GOOGLE_API_KEY,
-//     temperature: 0.7,
-//     streaming: false,
-//     callbacks: [
-//       {
-//         handleLLMStart: async () => {
-//           console.log("🚀 Starting LLM call");
-//         },
-//         handleLLMEnd: async (output) => {
-//           console.log("✅ End LLM Call", output);
-//           const usage = output.llmOutput?.usage;
-//           if (usage) {
-//             // اگه می‌خوای مصرف توکن رو لاگ کنی، می‌تونی این بخش رو نگه داری
-//             // console.log("📊 Token Usage:", {
-//             //   prompt_tokens: usage.prompt_tokens,
-//             //   completion_tokens: usage.completion_tokens,
-//             //   total_tokens: usage.total_tokens,
-//             // });
-//           }
-//         },
-//       },
-//     ],
-//   }).bindTools(tools);
-
-//   return model;
-// };
-
-
-
 export const initialiseModel = () => {
-  const model = new ChatOpenAI({
-    modelName: "gpt-4o",
-    openAIApiKey: process.env.OPENAI_API_KEY,
-    cache: true,
+  const model = new ChatAnthropic({
+    modelName: "claude-3-haiku-20240307",
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
     temperature: 0.7,
     maxTokens: 4096,
     streaming: true,
-    // clientOptions اگر پارامترهای خاصی برای OpenAI لازم دارید، می‌توانید در اینجا اضافه کنید
+    clientOptions: {
+      defaultHeaders: {
+        "anthropic-beta": "prompt-caching-2024-07-31",
+      },
+    },
     callbacks: [
       {
         handleLLMStart: async () => {
@@ -103,74 +71,26 @@ export const initialiseModel = () => {
         handleLLMEnd: async (output) => {
           console.log("✅ End LLM Call", output);
           const usage = output.llmOutput?.usage;
-
-          output.generations.map((generation) => {
-            generation.map(() => {
-              console.log("Generation", JSON.stringify(generation[0]));
-            });
-          });
           if (usage) {
-            // اگر می‌خواهید میزان مصرف توکن را لاگ کنید یا از آن استفاده کنید:
-            console.log("📊 Token Usage:", {
-              prompt_tokens: usage.prompt_tokens,
-              completion_tokens: usage.completion_tokens,
-              total_tokens: usage.total_tokens,
-            });
+            // console.log("📊 Token Usage:", {
+            //   input_tokens: usage.input_tokens,
+            //   output_tokens: usage.output_tokens,
+            //   total_tokens: usage.input_tokens + usage.output_tokens,
+            //   cache_creation_input_tokens:
+            //     usage.cache_creation_input_tokens || 0,
+            //   cache_read_input_tokens: usage.cache_read_input_tokens || 0,
+            // });
           }
         },
-        // برای مشاهده‌ی توکن‌های استریم شده می‌توانید از handleLLMNewToken استفاده کنید:
-        handleLLMNewToken: async (token: string) => {
-          console.log("🆕 New token:", token);
-        },
+        // handleLLMNewToken: async (token: string) => {
+        //   console.log("🆕 New token:", token);
+        // },
       },
     ],
   }).bindTools(tools);
 
   return model;
 };
-
-
-
-// export const initialiseModel = () => {
-//   const model = new ChatAnthropic({
-//     modelName: "Claude-3-5-sonnet-20241022",
-//     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-//     temperature: 0.7,
-//     maxTokens: 4096,
-//     streaming: true,
-//     clientOptions: {
-//       defaultHeaders: {
-//         "anthropic-beta": "prompt-caching-2024-07-31",
-//       },
-//     },
-//     callbacks: [
-//       {
-//         handleLLMStart: async () => {
-//           console.log("🚀 Starting LLM call");
-//         },
-//         handleLLMEnd: async (output) => {
-//           console.log("✅ End LLM Call", output);
-//           const usage = output.llmOutput?.usage;
-//           if (usage) {
-//             // console.log("📊 Token Usage:", {
-//             //   input_tokens: usage.input_tokens,
-//             //   output_tokens: usage.output_tokens,
-//             //   total_tokens: usage.input_tokens + usage.output_tokens,
-//             //   cache_creation_input_tokens:
-//             //     usage.cache_creation_input_tokens || 0,
-//             //   cache_read_input_tokens: usage.cache_read_input_tokens || 0,
-//             // });
-//           }
-//         },
-//         // handleLLMNewToken: async (token: string) => {
-//         //   console.log("🆕 New token:", token);
-//         // },
-//       },
-//     ],
-//   }).bindTools(tools);
-
-//   return model;
-// };
 
 // تعریف تابعی که بررسی می‌کند ادامه داده شود یا نه
 function shouldContinue(state: typeof MessagesAnnotation.State) {

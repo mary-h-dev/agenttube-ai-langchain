@@ -13,6 +13,7 @@ export const NavigationContext = createContext<NavigationContextType>({
   closeMobileNav: () => {},
 });
 
+
 export function NavigationProvider({
   children,
 }: {

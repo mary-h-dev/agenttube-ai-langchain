@@ -9,8 +9,7 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 import MessageBubble from "./MessageBubble";
 import WelcomeMessage from "./WelcomeMessage";
-// import { useAuth } from "@clerk/nextjs";
-
+import { useAuth } from "@clerk/nextjs";
 
 interface ChatInterfaceProps {
   chatId: Id<"chats">;
@@ -18,8 +17,8 @@ interface ChatInterfaceProps {
 }
 
 function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
-  // const { userId } = useAuth();
-  // console.log("userId Interface",userId)
+  const { userId } = useAuth();
+  console.log("userId Interface", userId);
   const [messages, setMessages] = useState<Doc<"messages">[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +30,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
   // به انتهای ‍‍‍‍‍یام میره
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   //این میره به انتهای صفحه در صورت یکه ‍یام جدیدی برامون بیاد
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -113,6 +111,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     setInput("");
     setStreamedResponse("");
     setIsLoading(true);
+    setCurrentTool(null);
 
     // تا اینجا ‍یام کاربر رفته حالا می خوایم خیلی خوب نمایش داده بشه
     // Add user's message immediately for better UX
@@ -130,6 +129,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
     // اینجا ‍یام میره سمت سرور
     try {
+   
       // Prepare request body
       const requestBody: ChatRequestBody = {
         messages: messages.map((msg) => ({
@@ -138,7 +138,6 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
         })),
         newMessage: trimmedInput,
         chatId,
-        // userId,  
       };
 
       // Initialize SSE connection
@@ -229,7 +228,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
               } as Doc<"messages">;
 
               const convex = getConvexClient();
-              console.log("debug", fullResponse)
+              console.log("debug", fullResponse);
               await convex.mutation(api.messages.store, {
                 chatId,
                 content: fullResponse,
@@ -265,7 +264,7 @@ function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       {/* Messages */}
       <section className="flex-1 overflow-y-auto bg-gray-50 p-2 md:p-0">
         <div className="max-w-4xl mx-auto p-4 space-y-3">
-          {messages?.length === 0 && <WelcomeMessage/>}
+          {messages?.length === 0 && <WelcomeMessage />}
           {messages.map((message: Doc<"messages">) => (
             <MessageBubble
               key={message._id}
